@@ -45,30 +45,30 @@ def open_window(code, decode):
     cipher_var.trace_add("write", toggle_inputs)
     message_var.trace_add("write", toggle_inputs)
 
-    # Label e Entry para Cipher
+    # Cipher
     ttk.Label(frm, text="Cifra:", style="TLabel").grid(column=0, row=0, sticky="e", pady=10)
     cipher_entry = ttk.Entry(frm, width=30, textvariable=cipher_var, style="TEntry")
     cipher_entry.grid(column=1, row=0, pady=10, padx=10)
 
-    # Label e Entry para Message
+    # Message
     ttk.Label(frm, text="Mensagem:", style="TLabel").grid(column=0, row=1, sticky="e", pady=10)
     message_entry = ttk.Entry(frm, width=30, textvariable=message_var, style="TEntry")
     message_entry.grid(column=1, row=1, pady=10, padx=10)
 
-    # Label e Entry para Matrix
+    # Matrix
     ttk.Label(frm, text="Matriz:", style="TLabel").grid(column=0, row=2, sticky="e", pady=10)
     matrix_entry = ttk.Entry(frm, width=30, textvariable=matrix_var, style="TEntry")
     matrix_entry.grid(column=1, row=2, pady=10, padx=10)
 
-    # Checkbox para verificar inversibilidade
+    # Inversivel
     verify_checkbox = ttk.Checkbutton(frm, text="Inversa", onvalue=1, offvalue=0, variable=is_inverse, style="TCheckbutton")
     verify_checkbox.grid(column=0, row=3, columnspan=1, pady=10)
 
-    # Botão para executar a função
+    # Execute
     execute_button = ttk.Button(frm, text="Desvendar o Enigma", command=lambda: execute_operation(message_var.get(), cipher_var.get(), matrix_entry.get(), is_inverse.get(), code, decode), style="TButton")
     execute_button.grid(column=0, row=4, columnspan=2, pady=20)
 
-    # Botão de Help
+    # Help
     help_button = ttk.Button(frm, text="Ajuda", command=show_help, style="TButton")
     help_button.grid(column=0, row=5, columnspan=2, pady=10)
 
