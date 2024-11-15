@@ -8,8 +8,8 @@ Linear Enigma é um projeto acadêmico desenvolvido como parte do curso de Cálc
 - [Objetivo](#objetivo)
 - [Requisitos](#requisitos)
 - [Funcionalidades](#funcionalidades)
+- [Diagramas](#diagramas)
 - [Instalação e Uso](#instalação-e-uso)
-- [Exemplos de Uso](#exemplos-de-uso)
 - [Licença](#licença)
 
 ## Objetivo
@@ -32,6 +32,9 @@ Para seguir o projeto, é recomendável:
 - **Decodificação de Mensagens**: Decodifica mensagens cifradas usando a matriz inversa.
 - **Quebra de Códigos**: Utiliza um algoritmo específico para resolver códigos baseados em pistas parciais.
 
+# Diagramas
+![diagram](assets/diagram.svg)
+
 ## Instalação e Uso
 
 1. **Clone o repositório**:
@@ -46,33 +49,9 @@ Para seguir o projeto, é recomendável:
     pip install -r requirements.txt
     ```
 
-3. **Execute os scripts de codificação e decodificação**:
-    Execute o script principal para testar a cifra de Hill.
-    ```bash
-    python hill_cipher.py
-    ```
+3. **Execute o GUI de codificação e decodificação**:
+    execute o arquivo `run.bat`
 
-## Exemplos de Uso
-
-Aqui está um exemplo básico para codificar uma mensagem com uma matriz de segunda ordem:
-
-```python
-# Exemplo de codificação
-from hill_cipher import HillCipher
-
-cipher = HillCipher([[3, 3], [2, 5]])
-message = "LEARNING MACHINE"
-encrypted_message = cipher.encode(message)
-print("Mensagem Cifrada:", encrypted_message)
-```
-
-Para decodificar a mensagem:
-
-```python
-# Exemplo de decodificação
-decoded_message = cipher.decode(encrypted_message)
-print("Mensagem Decifrada:", decoded_message)
-```
 
 ## Licença
 
