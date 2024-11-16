@@ -1,5 +1,8 @@
 import numpy as np
 
+def break_code(cypher : str, message : str):
+    return ''
+
 def code(message : str, m : list, is_inverse : bool) -> str :
     # Preparação
     print(f"Sherlock.Code : Mensagem Recebida={message} : Tamanho : {len(message)} : Matriz_Inversa={is_inverse}")

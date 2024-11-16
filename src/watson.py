@@ -3,14 +3,14 @@ from tkinter import ttk
 from tkinter import messagebox
 
 
-def open_window(code, decode):
+def open_window(code, decode, break_code):
     root = Tk()
     root.title("Linear Enigma")
 
     # Estilização
-    root.maxsize(width=400, height=300)
-    root.minsize(width=400, height=300)
-    root.iconbitmap(r"assets\icon.ico")
+    root.maxsize(width=400, height=400)
+    root.minsize(width=400, height=400)
+    # root.iconbitmap(r"assets\icon.ico")
     root.configure(bg="#1E1E2E")
     style = ttk.Style(root)
     style.configure("TFrame", background="#1E1E2E")
@@ -25,25 +25,11 @@ def open_window(code, decode):
     root.columnconfigure(0, weight=1)
     root.rowconfigure(0, weight=1)
 
-    # Função para gerenciar os campos de entrada
-    def toggle_inputs(*args):
-        if cipher_var.get():
-            message_entry.config(state="disabled")
-        else:
-            message_entry.config(state="normal")
-
-        if message_var.get():
-            cipher_entry.config(state="disabled")
-        else:
-            cipher_entry.config(state="normal")
-
     # Variáveis de controle para monitorar entradas
     cipher_var = StringVar()
     message_var = StringVar()
     matrix_var = StringVar()
     is_inverse = BooleanVar(value=False)
-    cipher_var.trace_add("write", toggle_inputs)
-    message_var.trace_add("write", toggle_inputs)
 
     # Cipher
     ttk.Label(frm, text="Cifra:", style="TLabel").grid(column=0, row=0, sticky="e", pady=10)
@@ -69,16 +55,29 @@ def open_window(code, decode):
     execute_button.grid(column=0, row=4, columnspan=2, pady=20)
 
     # Help
-    help_button = ttk.Button(frm, text="Ajuda", command=show_help, style="TButton")
+    help_button = ttk.Button(frm, text="Quebrar o Enigma", command=lambda: execute_break(message_var.get(), cipher_var.get(), break_code), style="TButton")
     help_button.grid(column=0, row=5, columnspan=2, pady=10)
+
+    # Help
+    help_button = ttk.Button(frm, text="Ajuda", command=show_help, style="TButton")
+    help_button.grid(column=0, row=6, columnspan=2, pady=10)
 
     for child in frm.winfo_children():
         child.grid_configure(padx=10, pady=5)
 
     root.mainloop()
 
+def execute_break(msg, cipher, break_code):
+    if msg and cipher:
+        msg_result = break_code(msg, cipher)
+        messagebox.showinfo("Resultado", f"Cifra quebrada com sucesso!\nMensagem: {msg_result}")
+    else:
+        messagebox.showerror(title='Erro!', message='Preencha ambos os campos.')
 
 def execute_operation(msg, cipher, matrix, inverse, code, decode):
+    if not matrix:
+        messagebox.showerror(title='Erro!', message='É necessário uma matriz para encriptar e descriptar.\nPreencha a matriz.')
+
     if msg and cipher:
         messagebox.showerror(title='Erro!', message='Preencha apenas um dos campos.')
     elif msg:
