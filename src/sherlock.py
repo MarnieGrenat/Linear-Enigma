@@ -1,7 +1,33 @@
 import numpy as np
 
-def break_code(cypher : str, message : str):
-    return ''
+import numpy as np
+import math
+
+def break_code(cypher: str, partial_decoded: str) -> str:
+    """
+    Decodifica uma mensagem cifrada pela cifra de Hill usando uma parte da mensagem já decodificada.
+    """
+
+    # Converte as mensagens em vetores numéricos
+    cypher_numbers = [transforma_letra_em_numero(c) for c in cypher]
+    decoded_numbers = [transforma_letra_em_numero(c) for c in partial_decoded]
+
+    # Construir matriz ampliada (2x2 para pares)
+    matriz_cypher = np.array(cypher_numbers[:4]).reshape(2, 2)
+    matriz_decoded = np.array(decoded_numbers[:4]).reshape(2, 2)
+
+    # Determinar a matriz de decodificação
+    matriz_cypher_inv = inverter_modular(matriz_cypher)
+    matriz_decodificadora = np.dot(matriz_decoded, matriz_cypher_inv) % 26
+
+    # Aplicar a matriz de decodificação à cifra completa
+    decoded_message = ""
+    for i in range(0, len(cypher_numbers), 2):
+        bloco = np.array(cypher_numbers[i:i+2])
+        decoded_bloco = np.dot(matriz_decodificadora, bloco) % 26
+        decoded_message += "".join(transforma_numero_em_letra(n) for n in decoded_bloco)
+
+    return decoded_message
 
 def code(message : str, m : list, is_inverse : bool) -> str :
     # Preparação
@@ -125,3 +151,23 @@ def inverter(matriz):
     except np.linalg.LinAlgError:
         print("A matriz não tem inversa (determinante é zero).")
     return matriz
+
+def inverter_modular(matriz, mod=26):
+    # Determinante
+    det = int(round(np.linalg.det(matriz)))
+    det_mod = det % mod
+
+    # Verificar se o determinante é invertível no módulo
+    if math.gcd(det_mod, mod) != 1:
+        raise ValueError(f"Determinante ({det_mod}) não possui inverso modular no módulo {mod}.")
+
+    # Inverso modular do determinante
+    det_inv = pow(det_mod, -1, mod)
+
+    # Cálculo da adjunta da matriz
+    adj = np.array([[matriz[1, 1], -matriz[0, 1]],
+                    [-matriz[1, 0], matriz[0, 0]]]) % mod
+
+    # Inversa modular
+    inv = (det_inv * adj) % mod
+    return inv
