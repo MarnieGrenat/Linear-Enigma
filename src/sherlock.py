@@ -31,38 +31,6 @@ def decypher(texto_cifrado, texto_claro_parcial):
 
     return texto_decifrado
 
-def encontrar_transposta_decodificadora(matriz_cifrada, matriz_clara):
-    """
-    Transforma a matriz cifrada na identidade e aplica as mesmas operações
-    na matriz clara, resultando na transposta da matriz decodificadora.
-    """
-    mod = 26
-    n = matriz_cifrada.shape[0]
-
-    # Garante que são inteiros
-    matriz_esquerda = matriz_cifrada.astype(int).copy()
-    matriz_direita = matriz_clara.astype(int).copy()
-
-    for i in range(n):
-        # Inverso modular do elemento diagonal
-        elem_diagonal = int(matriz_esquerda[i, i])
-        if elem_diagonal == 0:
-            raise ValueError("Elemento diagonal zero encontrado, não é possível calcular o inverso modular.")
-        inverso_modular = pow(elem_diagonal, -1, mod)
-
-        # Escala linha
-        matriz_esquerda[i] = (matriz_esquerda[i] * inverso_modular) % mod
-        matriz_direita[i] = (matriz_direita[i] * inverso_modular) % mod
-
-        # Executa Gauss Jordan na coluna
-        for j in range(n):
-            if i != j:
-                fator = matriz_esquerda[j, i]
-                matriz_esquerda[j] = (matriz_esquerda[j] - fator * matriz_esquerda[i]) % mod
-                matriz_direita[j] = (matriz_direita[j] - fator * matriz_direita[i]) % mod
-
-    return matriz_direita.T
-
 def code(message : str, m : list, is_inverse : bool) -> str :
     # Preparação
     print(f"Sherlock.Code : Mensagem Recebida={message} : Tamanho : {len(message)} : Matriz_Inversa={is_inverse}")
@@ -78,7 +46,7 @@ def code(message : str, m : list, is_inverse : bool) -> str :
     for vetor in lista_de_vetores:
         # Multiplica cada vetor pela matriz\ de cifra
         vetor_cifra = np.dot(matriz_cifra, vetor)
-        #
+
         for elemento in vetor_cifra:
             mensagem_cifrada += transforma_numero_em_letra(elemento)
 
@@ -130,6 +98,38 @@ def transforma_texto_em_lista_de_vetores(texto : str, tam_vetor : int) -> list:
         vetor = np.array(vetor)
         lista_de_vetores.append(vetor)
     return lista_de_vetores
+
+def encontrar_transposta_decodificadora(matriz_cifrada, matriz_clara):
+    """
+    Transforma a matriz cifrada na identidade e aplica as mesmas operações
+    na matriz clara, resultando na transposta da matriz decodificadora.
+    """
+    mod = 26
+    n = matriz_cifrada.shape[0]
+
+    # Garante que são inteiros
+    matriz_esquerda = matriz_cifrada.astype(int).copy()
+    matriz_direita = matriz_clara.astype(int).copy()
+
+    for i in range(n):
+        # Inverso modular do elemento diagonal
+        elem_diagonal = int(matriz_esquerda[i, i])
+        if elem_diagonal == 0:
+            raise ValueError("Elemento diagonal zero encontrado, não é possível calcular o inverso modular.")
+        inverso_modular = pow(elem_diagonal, -1, mod)
+
+        # Escala linha
+        matriz_esquerda[i] = (matriz_esquerda[i] * inverso_modular) % mod
+        matriz_direita[i] = (matriz_direita[i] * inverso_modular) % mod
+
+        # Executa Gauss Jordan na coluna
+        for j in range(n):
+            if i != j:
+                fator = matriz_esquerda[j, i]
+                matriz_esquerda[j] = (matriz_esquerda[j] - fator * matriz_esquerda[i]) % mod
+                matriz_direita[j] = (matriz_direita[j] - fator * matriz_direita[i]) % mod
+
+    return matriz_direita.T
 
 # Suporta apenas matrizes 2x2
 def inverter(matriz):
