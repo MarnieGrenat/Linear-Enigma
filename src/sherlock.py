@@ -1,33 +1,67 @@
 import numpy as np
 
-import numpy as np
-import math
+def decypher(texto_cifrado, texto_claro_parcial):
+    n = len(texto_claro_parcial)
+    if n % 2 != 0:
+        raise ValueError("Sherlock.Decypher : O texto claro parcial deve ter um número par de caracteres.")
 
-def break_code(cypher: str, partial_decoded: str) -> str:
+    matriz_claro = []
+    matriz_cifrado = []
+
+    for i in range(0, n, 2):
+        par_claro = [transforma_letra_em_numero(c) for c in texto_claro_parcial[i:i+2]]
+        par_cifrado = [transforma_letra_em_numero(c) for c in texto_cifrado[i:i+2]]
+        matriz_claro.append(par_claro)
+        matriz_cifrado.append(par_cifrado)
+
+    matriz_claro = np.array(matriz_claro)
+    matriz_cifrado = np.array(matriz_cifrado)
+
+    print(f'Sherlock.Decypher : Matriz MSG={matriz_claro} : Matriz Cifrada={matriz_cifrado}')
+
+    matriz_chave = encontrar_transposta_decodificadora(matriz_cifrado, matriz_claro)
+
+    print(f'Sherlock.Decypher : Matriz Chave={matriz_chave}')
+
+    texto_decifrado = ""
+    for i in range(0, len(texto_cifrado), 2):
+        par_cifrado = [transforma_letra_em_numero(c) for c in texto_cifrado[i:i+2]]
+        par_decifrado = np.dot(matriz_chave, par_cifrado) % 26
+        texto_decifrado += ''.join(transforma_numero_em_letra(num) for num in par_decifrado)
+
+    return texto_decifrado
+
+def encontrar_transposta_decodificadora(matriz_cifrada, matriz_clara):
     """
-    Decodifica uma mensagem cifrada pela cifra de Hill usando uma parte da mensagem já decodificada.
+    Transforma a matriz cifrada na identidade e aplica as mesmas operações
+    na matriz clara, resultando na transposta da matriz decodificadora.
     """
+    mod = 26
+    n = matriz_cifrada.shape[0]
 
-    # Converte as mensagens em vetores numéricos
-    cypher_numbers = [transforma_letra_em_numero(c) for c in cypher]
-    decoded_numbers = [transforma_letra_em_numero(c) for c in partial_decoded]
+    # Garante que são inteiros
+    matriz_esquerda = matriz_cifrada.astype(int).copy()
+    matriz_direita = matriz_clara.astype(int).copy()
 
-    # Construir matriz ampliada (2x2 para pares)
-    matriz_cypher = np.array(cypher_numbers[:4]).reshape(2, 2)
-    matriz_decoded = np.array(decoded_numbers[:4]).reshape(2, 2)
+    for i in range(n):
+        # Inverso modular do elemento diagonal
+        elem_diagonal = int(matriz_esquerda[i, i])
+        if elem_diagonal == 0:
+            raise ValueError("Elemento diagonal zero encontrado, não é possível calcular o inverso modular.")
+        inverso_modular = pow(elem_diagonal, -1, mod)
 
-    # Determinar a matriz de decodificação
-    matriz_cypher_inv = inverter_modular(matriz_cypher)
-    matriz_decodificadora = np.dot(matriz_decoded, matriz_cypher_inv) % 26
+        # Escala linha
+        matriz_esquerda[i] = (matriz_esquerda[i] * inverso_modular) % mod
+        matriz_direita[i] = (matriz_direita[i] * inverso_modular) % mod
 
-    # Aplicar a matriz de decodificação à cifra completa
-    decoded_message = ""
-    for i in range(0, len(cypher_numbers), 2):
-        bloco = np.array(cypher_numbers[i:i+2])
-        decoded_bloco = np.dot(matriz_decodificadora, bloco) % 26
-        decoded_message += "".join(transforma_numero_em_letra(n) for n in decoded_bloco)
+        # Executa Gauss Jordan na coluna
+        for j in range(n):
+            if i != j:
+                fator = matriz_esquerda[j, i]
+                matriz_esquerda[j] = (matriz_esquerda[j] - fator * matriz_esquerda[i]) % mod
+                matriz_direita[j] = (matriz_direita[j] - fator * matriz_direita[i]) % mod
 
-    return decoded_message
+    return matriz_direita.T
 
 def code(message : str, m : list, is_inverse : bool) -> str :
     # Preparação
@@ -50,7 +84,7 @@ def code(message : str, m : list, is_inverse : bool) -> str :
 
     return mensagem_cifrada.upper()
 
-def decode (cypher : str, m : list, is_inverse : bool) -> str :
+def decode(cypher : str, m : list, is_inverse : bool) -> str :
     # Preparação
     print(f"Sherlock.Decode : Mensagem Cifrada Recebida={cypher} : Tamanho : {len(cypher)} : Matriz_Inversa={is_inverse}")
     matriz_cifra = np.array(m)
@@ -97,6 +131,32 @@ def transforma_texto_em_lista_de_vetores(texto : str, tam_vetor : int) -> list:
         lista_de_vetores.append(vetor)
     return lista_de_vetores
 
+# Suporta apenas matrizes 2x2
+def inverter(matriz):
+    inversa = {
+        1: 1, 3: 9, 5: 21, 7: 15, 9: 3, 11: 19, 15: 7,
+        17: 23, 19: 11, 21: 5, 23: 17, 25: 25
+    }
+    try:
+        # Determinante como inteiro
+        det_A = int(round(np.linalg.det(matriz)))
+        det_mod_26 = det_A % 26
+
+        if det_mod_26 == 0 or det_mod_26 not in inversa:
+            raise ValueError(f"Sherlock.Inverter : Determinante ({det_A}) não possui inverso modular no módulo 26.")
+
+        # Cálculo da adjunta
+        adj_A = np.array([[matriz[1, 1], -matriz[0, 1]],
+                          [-matriz[1, 0], matriz[0, 0]]]) % 26
+
+        # Inversa modular do determinante
+        det_inv = inversa[det_mod_26]
+        inv_A = (det_inv * adj_A) % 26
+        return inv_A
+
+    except np.linalg.LinAlgError:
+        raise ValueError("Sherlock.Inverter : Erro ao calcular a matriz inversa.")
+
 def transforma_letra_em_numero(letra : str) -> int:
     modulo26 = 'zabcdefghijklmnopqrstuvwxy'
     return modulo26.find(letra.lower())
@@ -104,70 +164,3 @@ def transforma_letra_em_numero(letra : str) -> int:
 def transforma_numero_em_letra(numero : int) -> str:
     modulo26 = 'zabcdefghijklmnopqrstuvwxy'
     return modulo26[int(numero) % 26]
-
-# Suporta apenas matrizes 2x2
-def inverter(matriz):
-    inversa = {
-        1 : 1,
-        3 : 9,
-        5 : 21,
-        7 : 15,
-        9 : 3,
-        11 : 19,
-        15 : 7,
-        17 : 23,
-        19 : 11,
-        21 : 5,
-        23 : 17,
-        25 : 25
-    }
-    try:
-        # Determinante como inteiro
-        det_A = int(round(np.linalg.det(matriz)))
-
-        if det_A == 0:
-            print(f"Sherlock.Inverter : A matriz não tem inversa (determinante é zero) : Matriz={matriz}")
-            return matriz
-
-        # Verificar se o determinante tem inversa modular
-        det_mod_26 = det_A % 26
-        if det_mod_26 not in inversa:
-            print(f"Sherlock.Inverter : Determinante não possui inversa modular : Determinante={det_A}")
-            return matriz
-
-        # Cálculo da adjunta
-        adj_A = np.array([[matriz[1, 1], -matriz[0, 1]],
-                          [-matriz[1, 0], matriz[0, 0]]])
-
-        # Inversa modular do determinante
-        det_inv = inversa[det_mod_26]
-
-        # Multiplicação pelo inverso modular
-        inv_A = (det_inv * adj_A) % 26
-
-        print(f"Sherlock.Inverter : matriz inversa com sucesso : Matriz_Inversa={inv_A}")
-        return inv_A
-
-    except np.linalg.LinAlgError:
-        print("A matriz não tem inversa (determinante é zero).")
-    return matriz
-
-def inverter_modular(matriz, mod=26):
-    # Determinante
-    det = int(round(np.linalg.det(matriz)))
-    det_mod = det % mod
-
-    # Verificar se o determinante é invertível no módulo
-    if math.gcd(det_mod, mod) != 1:
-        raise ValueError(f"Determinante ({det_mod}) não possui inverso modular no módulo {mod}.")
-
-    # Inverso modular do determinante
-    det_inv = pow(det_mod, -1, mod)
-
-    # Cálculo da adjunta da matriz
-    adj = np.array([[matriz[1, 1], -matriz[0, 1]],
-                    [-matriz[1, 0], matriz[0, 0]]]) % mod
-
-    # Inversa modular
-    inv = (det_inv * adj) % mod
-    return inv

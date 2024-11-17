@@ -8,8 +8,8 @@ def open_window(code, decode, break_code):
     root.title("Linear Enigma")
 
     # Estilização
-    root.maxsize(width=400, height=400)
-    root.minsize(width=400, height=400)
+    root.maxsize(width=380, height=380)
+    root.minsize(width=380, height=380)
     # root.iconbitmap(r"assets\icon.ico")
     root.configure(bg="#1E1E2E")
     style = ttk.Style(root)
@@ -68,11 +68,20 @@ def open_window(code, decode, break_code):
     root.mainloop()
 
 def execute_break(msg, cipher, break_code):
-    if msg and cipher:
-        msg_result = break_code(msg, cipher)
+    """
+    Executa a função de quebra da cifra de Hill.
+    """
+    try:
+        if not msg or not cipher:
+            raise ValueError("Preencha ambos os campos: Mensagem e Cifra.")
+
+        # Chamar a função break_code com os parâmetros fornecidos
+        msg_result = break_code(cipher, msg)  # Note que msg é o partial_decoded
+
+        # Exibir o resultado
         messagebox.showinfo("Resultado", f"Cifra quebrada com sucesso!\nMensagem: {msg_result}")
-    else:
-        messagebox.showerror(title='Erro!', message='Preencha ambos os campos.')
+    except Exception as e:
+        messagebox.showerror("Erro!", f"Erro ao executar a operação:\n{e}")
 
 def execute_operation(msg, cipher, matrix, inverse, code, decode):
     if not matrix:
@@ -94,19 +103,43 @@ def show_help():
     """
     Exibe as instruções de uso do programa.
     """
-    help_message = (
-        "Bem-vindo ao Linear Enigma!\n\n"
-        "Como usar o programa:\n"
-        "- Preencha **apenas um dos campos**: Cipher ou Message.\n"
-        "- No campo Matrix, insira uma matriz no formato: 1,2;3,4\n"
-        "  Isso representa a matriz:\n"
-        "  [[1, 2],\n"
-        "   [3, 4]]\n"
-        "- Clique no botão Execute Cipher para codificar ou decodificar a mensagem.\n\n"
-        "Dicas:\n"
-        "- Se preencher Cipher, a mensagem será decodificada.\n"
-        "- Se preencher Message, ela será codificada usando a matriz informada.\n"
-        "- Certifique-se de preencher a matriz antes de executar qualquer operação.\n"
+    help_message = ("""
+Bem-vindo ao Linear Enigma!
+
+Esta ferramenta permite codificar, decodificar e quebrar mensagens utilizando a Cifra de Hill. Siga as instruções abaixo para utilizar corretamente o programa:
+
+Como usar:
+
+1. Preencher os campos necessários:
+   - Cifra: Insira o texto cifrado que deseja decodificar.
+   - Mensagem: Insira o texto parcial decifrado (no caso de quebra de cifra) ou o texto original que deseja codificar.
+   - Matriz: Insira a matriz de codificação/decodificação no formato: 1,2;3,4.
+     Exemplo: 9,4;3,5 representa:
+       [[9, 4],
+        [3, 5]]
+
+2. Escolher a operação:
+   - Codificar Mensagem:
+     - Preencha o campo "Mensagem" e o campo "Matriz".
+     - Deixe o campo "Cifra" vazio.
+     - Clique em "Desvendar o Enigma".
+   - Decodificar Cifra:
+     - Preencha o campo "Cifra" e o campo "Matriz".
+     - Deixe o campo "Mensagem" vazio.
+     - Clique em "Desvendar o Enigma".
+   - Quebrar a Cifra:
+     - Preencha ambos os campos "Mensagem" (com uma parte do texto decifrado) e "Cifra" (texto cifrado completo).
+     - Deixe o campo "Matriz" vazio.
+     - Clique em "Quebrar o Enigma".
+
+3. Opção de Matriz Inversa:
+   - Marque a opção Inversa caso precise trabalhar com a matriz inversa para codificação ou decodificação.
+
+Dicas:
+
+- Certifique-se de inserir a matriz corretamente no formato especificado (1,2;3,4).
+- Preencha apenas os campos necessários para a operação escolhida.
+"""
     )
     messagebox.showinfo("Ajuda", help_message)
 
