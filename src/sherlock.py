@@ -29,7 +29,7 @@ def decypher(texto_cifrado, texto_claro_parcial):
         par_decifrado = np.dot(matriz_chave, par_cifrado) % 26
         texto_decifrado += ''.join(transforma_numero_em_letra(num) for num in par_decifrado)
 
-    return texto_decifrado
+    return texto_decifrado.upper()
 
 def code(message : str, m : list, is_inverse : bool) -> str :
     # Preparação
@@ -152,6 +152,7 @@ def inverter(matriz):
         # Inversa modular do determinante
         det_inv = inversa[det_mod_26]
         inv_A = (det_inv * adj_A) % 26
+        print(f'Sherlock.Inverter : Matriz invertida com sucesso : \nMatriz=\n{matriz} \nMatriz Inversa=\n{inv_A}')
         return inv_A
 
     except np.linalg.LinAlgError:

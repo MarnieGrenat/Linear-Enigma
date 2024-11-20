@@ -10,7 +10,7 @@ def open_window(code, decode, break_code):
     # Estilização
     root.maxsize(width=380, height=380)
     root.minsize(width=380, height=380)
-    # root.iconbitmap(r"assets\icon.ico")
+    root.iconbitmap(r"assets\icon.ico")
     root.configure(bg="#1E1E2E")
     style = ttk.Style(root)
     style.configure("TFrame", background="#1E1E2E")
